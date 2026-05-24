@@ -1,1 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doyle Family Cottage — Booking</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1D9E75; --green-dark: #0F6E56; --green-light: #E1F5EE; --green-mid: #9FE1CB; --green-deep: #085041;
+    --amber-light: #FAEEDA; --amber-dark: #633806; --amber-mid: #BA7517;
+    --red-light: #FCEBEB; --red-dark: #A32D2D;
+    --bg: #f7f6f2; --surface: #ffffff; --surface2: #f1f0eb;
+    --text: #1a1a18; --text2: #5f5e5a; --text3: #888780;
+    --border: rgba(0,0,0,0.1); --border2: rgba(0,0,0,0.18);
+    --radius: 10px; --radius-sm: 6px; --radius-lg: 14px;
+    --font: 'Georgia', serif;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a18; --surface: #242422; --surface2: #2e2e2b;
+      --text: #f1f0eb; --text2: #b4b2a9; --text3: #888780;
+      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.18);
+      --green-light: #04342C; --green-mid: #085041; --green-deep: #9FE1CB;
+      --amber-light: #412402; --amber-dark: #FAC775;
+      --red-light: #501313; --red-dark: #F7C1C1;
+    }
+  }
+  body { font-family: var(--font-sans); background: var(--bg); color: var(--text); min-height: 100vh; }
+  .page { max-width: 680px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+  .header { display: flex; align-items: center; gap: 14px; margin-bottom: 2rem; }
+  .header-icon { width: 50px; height: 50px; border-radius: var(--radius); background: var(--green-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .header-icon i { font-size: 24px; color: var(--green-dark); }
+  .header h1 { font-family: var(--font); font-size: 22px; font-weight: normal; color: var(--text); }
+  .header p { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 1.5rem; }
+  .tab { flex: 1; padding: 8px 4px; text-align: center; font-size: 13px; border-radius: 5px; cursor: pointer; border: none; background: transparent; color: var(--text2); transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .tab.active { background: var(--surface); color: var(--text); font-weight: 500; border: 0.5px solid var(--border); }
+  .panel { display: none; } .panel.active { display: block; }
+  .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+  label { font-size: 13px; color: var(--text2); display: block; margin-bottom: 4px; }
+  input, select, textarea {
+    width: 100%; margin-bottom: 12px; padding: 8px 10px; font-size: 14px;
+    border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text); font-family: var(--font-sans);
+    outline: none; transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--green); }
+  textarea { height: 72px; resize: vertical; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .btn { padding: 9px 18px; border-radius: var(--radius-sm); font-size: 14px; cursor: pointer; font-weight: 500; transition: all 0.15s; font-family: var(--font-sans); }
+  .btn-primary { background: var(--green); color: white; border: none; }
+  .btn-primary:hover { background: var(--green-dark); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-danger { background: transparent; color: var(--red-dark); border: 0.5px solid var(--red-dark); }
+  .btn-danger:hover { background: var(--red-light); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .booking-item { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 10px; }
+  .booking-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .booking-name { font-weight: 500; font-size: 15px; color: var(--text); }
+  .booking-dates { font-size: 13px; color: var(--text2); margin-top: 3px; }
+  .booking-notes { font-size: 13px; color: var(--text2); margin-top: 8px; font-style: italic; }
+  .status-badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+  .status-confirmed { background: var(--green-light); color: var(--green-dark); }
+  .status-tentative { background: var(--amber-light); color: var(--amber-dark); }
+  .status-cancelled { background: var(--red-light); color: var(--red-dark); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .cal-header-day { text-align: center; font-size: 11px; color: var(--text3); padding: 4px; font-weight: 500; }
+  .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-size: 12px; border: 0.5px solid transparent; }
+  .cal-day.other-month { opacity: 0.3; }
+  .cal-day.today { border-color: var(--green); font-weight: 600; }
+
+
+
+
+  /* Person colors */
+  .p-tracy  { --pc: #7C3AED; --pc-light: #EDE9FE; --pc-mid: #C4B5FD; }
+  .p-michael{ --pc: #2563EB; --pc-light: #DBEAFE; --pc-mid: #93C5FD; }
+  .p-michelle{--pc: #059669; --pc-light: #D1FAE5; --pc-mid: #6EE7B7; }
+  .p-grandma{ --pc: #D97706; --pc-light: #FEF3C7; --pc-mid: #FCD34D; }
+  .p-paige  { --pc: #DC2626; --pc-light: #FEE2E2; --pc-mid: #FCA5A5; }
+  .p-other  { --pc: #6B7280; --pc-light: #F3F4F6; --pc-mid: #D1D5DB; }
+  .cal-day.booked-start { color: white; border-radius: 5px 0 0 5px; background: var(--pc, #1D9E75); }
+  .cal-day.booked-end   { color: white; border-radius: 0 5px 5px 0; background: var(--pc, #1D9E75); }
+  .cal-day.booked-mid   { border-radius: 0; background: var(--pc-mid, #9FE1CB); color: #1a1a18; }
+  .cal-day.booked-single{ color: white; border-radius: 5px; background: var(--pc, #1D9E75); }
+  .booking-item { border-left: 4px solid var(--pc, var(--green)); }
+  .cal-month-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .cal-month-nav button { background: transparent; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); padding: 5px 12px; cursor: pointer; color: var(--text); font-size: 14px; }
+  .cal-month-nav button:hover { background: var(--surface2); }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1rem; }
+  .stat { background: var(--surface2); border-radius: var(--radius-sm); padding: 1rem; }
+  .stat-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+  .stat-value { font-size: 24px; font-weight: 500; color: var(--text); }
+  .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text2); }
+  .empty-state i { font-size: 40px; display: block; margin-bottom: 12px; opacity: 0.4; }
+  .alert { border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; margin-bottom: 12px; display: none; }
+  .alert-warn { background: var(--amber-light); border: 0.5px solid var(--amber-mid); color: var(--amber-dark); }
+  .alert-success { background: var(--green-light); border: 0.5px solid var(--green); color: var(--green-dark); }
+  .filter-bar { display: flex; gap: 6px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .filter-btn { padding: 5px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 0.5px solid var(--border2); background: transparent; color: var(--text2); font-family: var(--font-sans); }
+  .filter-btn.active { background: var(--green); color: white; border-color: var(--green); }
+  .legend { display: flex; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+  .loading { text-align: center; padding: 2rem; color: var(--text2); font-size: 14px; }
+  .tooltip-bar { min-height: 20px; font-size: 13px; color: var(--text2); margin-top: 10px; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="header-icon"><i class="ti ti-home-2"></i></div>
+    <div>
+      <h1>Doyle Family Cottage</h1>
+      <p>Shared booking calendar for everyone</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('calendar', this)"><i class="ti ti-calendar"></i> Calendar</button>
+    <button class="tab" onclick="showTab('bookings', this)"><i class="ti ti-list"></i> Bookings</button>
+    <button class="tab" onclick="showTab('add', this)"><i class="ti ti-plus"></i> Add booking</button>
+  </div>
+
+  <div id="panel-calendar" class="panel active">
+    <div class="stat-row">
+      <div class="stat"><div class="stat-label">Total bookings</div><div class="stat-value" id="stat-total">—</div></div>
+      <div class="stat"><div class="stat-label">Nights booked</div><div class="stat-value" id="stat-nights">—</div></div>
+      <div class="stat"><div class="stat-label">Upcoming</div><div class="stat-value" id="stat-upcoming">—</div></div>
+    </div>
+    <div class="card">
+      <div class="cal-month-nav">
+        <button onclick="changeMonth(-1)"><i class="ti ti-chevron-left"></i></button>
+        <span style="font-weight:500;font-size:15px;" id="cal-title"></span>
+        <button onclick="changeMonth(1)"><i class="ti ti-chevron-right"></i></button>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#7C3AED"></div> Tracy</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#2563EB"></div> Michael</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#059669"></div> Michelle</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#D97706"></div> Grandma</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#DC2626"></div> Paige</div>
+        <div class="legend-item"><div class="legend-dot" style="background:transparent;border:1.5px solid var(--green)"></div> Today</div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="tooltip-bar" id="cal-tooltip"></div>
+    </div>
+  </div>
+
+  <div id="panel-bookings" class="panel">
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('upcoming',this)">Upcoming</button>
+      <button class="filter-btn" onclick="setFilter('confirmed',this)">Confirmed</button>
+      <button class="filter-btn" onclick="setFilter('tentative',this)">Tentative</button>
+      <button class="filter-btn" onclick="setFilter('past',this)">Past</button>
+    </div>
+    <div id="bookings-list"><div class="loading"><i class="ti ti-loader"></i> Loading bookings...</div></div>
+  </div>
+
+  <div id="panel-add" class="panel">
+    <div class="card">
+      <div id="alert-conflict" class="alert alert-warn"></div>
+      <div id="alert-success" class="alert alert-success"></div>
+      <label>Your name / family group</label>
+      <input type="text" id="add-name" placeholder="e.g. The Smiths">
+      <div class="form-row">
+        <div><label>Check-in date</label><input type="date" id="add-checkin"></div>
+        <div><label>Check-out date</label><input type="date" id="add-checkout"></div>
+      </div>
+      <label>Status</label>
+      <select id="add-status">
+        <option value="confirmed">Confirmed</option>
+        <option value="tentative">Tentative</option>
+      </select>
+      <label>Number of guests</label>
+      <input type="number" id="add-guests" min="1" max="20" placeholder="e.g. 4">
+      <label>Notes (optional)</label>
+      <textarea id="add-notes" placeholder="e.g. Bringing the dog, arriving after 3pm..."></textarea>
+      <button class="btn btn-primary" onclick="addBooking()" style="width:100%" id="save-btn">Save booking</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbwrUJXmXThISjPc3geghGz4ALtha84UXmJVK-4vzUyqNzsgMyN7SmhSqHWA3EkL2Y4h2Q/exec';
+
+let bookings = [];
+let calMonth = new Date().getMonth();
+let calYear = new Date().getFullYear();
+let currentFilter = 'all';
+let isSaving = false;
+
+async function apiFetch(data) {
+  const res = await fetch(API, {
+    method: data ? 'POST' : 'GET',
+    ...(data ? { body: JSON.stringify(data) } : {}),
+    redirect: 'follow'
+  });
+  return res.json();
+}
+
+async function loadBookings() {
+  try {
+    const data = await apiFetch(null);
+    bookings = Array.isArray(data) ? data : [];
+    bookings.sort((a,b) => String(a.checkin).localeCompare(String(b.checkin)));
+  } catch(e) { bookings = []; }
+  renderAll();
+}
+
+function renderAll() { renderCalendar(); renderBookings(); updateStats(); }
+
+function showTab(name, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'add') clearForm();
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBookings();
+}
+
+function parseDate(s) {
+  if (!s) return new Date("invalid");
+  const str = String(s).trim();
+  const parts = str.split("-");
+  if (parts.length === 3) {
+    const y = parseInt(parts[0], 10), m = parseInt(parts[1], 10) - 1, d = parseInt(parts[2], 10);
+    if (!isNaN(y) && !isNaN(m) && !isNaN(d)) return new Date(y, m, d);
+  }
+  const dt = new Date(str); return isNaN(dt) ? new Date("invalid") : dt;
+}
+function fmtDate(s) { const d=parseDate(s); if(isNaN(d)) return "Invalid date"; return d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'}); }
+function nightsBetween(a,b) { return Math.round((parseDate(b)-parseDate(a))/86400000); }
+function esc(s) { const d=document.createElement('div'); d.textContent=String(s||''); return d.innerHTML; }
+function personClass(name) {
+  const n = String(name).toLowerCase();
+  if (n.includes("tracy"))   return "p-tracy";
+  if (n.includes("michael")) return "p-michael";
+  if (n.includes("michelle"))return "p-michelle";
+  if (n.includes("grandma") || n.includes("nana")) return "p-grandma";
+  if (n.includes("paige"))   return "p-paige";
+  return "p-other";
+}
+
+function hasConflict(checkin, checkout, excludeId=null) {
+  const s=parseDate(checkin), e=parseDate(checkout);
+  return bookings.some(b => {
+    if (String(b.id)===String(excludeId) || b.status==='cancelled') return false;
+    return s < parseDate(b.checkout) && e > parseDate(b.checkin);
+  });
+}
+
+async function addBooking() {
+  if (isSaving) return;
+  const name = document.getElementById('add-name').value.trim();
+  const checkin = document.getElementById('add-checkin').value;
+  const checkout = document.getElementById('add-checkout').value;
+  const status = document.getElementById('add-status').value;
+  const guests = document.getElementById('add-guests').value;
+  const notes = document.getElementById('add-notes').value.trim();
+  const warn = document.getElementById('alert-conflict');
+  const succ = document.getElementById('alert-success');
+  const btn = document.getElementById('save-btn');
+  warn.style.display='none'; succ.style.display='none';
+
+  if (!name || !checkin || !checkout) { warn.textContent='Please fill in name and dates.'; warn.style.display='block'; return; }
+  if (parseDate(checkout) <= parseDate(checkin)) { warn.textContent='Check-out must be after check-in.'; warn.style.display='block'; return; }
+  if (hasConflict(checkin, checkout)) { warn.textContent='These dates overlap with an existing booking.'; warn.style.display='block'; return; }
+
+  const b = { id: Date.now(), name, checkin, checkout, status, guests: guests||'', notes: notes||'', created: new Date().toISOString() };
+
+  // Show instantly in UI
+  bookings.push(b);
+  bookings.sort((a,b)=>String(a.checkin).localeCompare(String(b.checkin)));
+  clearForm();
+  calMonth = parseDate(checkin).getMonth();
+  calYear = parseDate(checkin).getFullYear();
+  renderAll();
+  // Switch to calendar tab immediately
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("panel-calendar").classList.add("active");
+  document.querySelector(".tab:first-child").classList.add("active");
+
+  // Save in background
+  isSaving = true;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Syncing...';
+  try {
+    await apiFetch({ action: 'add', ...b });
+    succ.textContent = '✓ Saved! All family members will see it.';
+    setTimeout(() => succ.style.display='none', 4000);
+  } catch(e) {
+    warn.textContent = 'Could not sync to Google Sheets. Check your connection and try again.';
+    warn.style.display='block';
+    succ.style.display='none';
+  } finally {
+    isSaving = false;
+    btn.disabled = false;
+    btn.innerHTML = 'Save booking';
+  }
+}
+
+function clearForm() {
+  ['add-name','add-guests','add-notes'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('add-status').value='confirmed';
+  document.getElementById('alert-conflict').style.display='none';
+  document.getElementById('alert-success').style.display='none';
+  const today = new Date().toISOString().split('T')[0];
+  const tom = new Date(); tom.setDate(tom.getDate()+1);
+  document.getElementById('add-checkin').value = today;
+  document.getElementById('add-checkout').value = tom.toISOString().split('T')[0];
+}
+
+async function deleteBooking(id) {
+  if (!confirm('Remove this booking?')) return;
+  bookings = bookings.filter(b=>String(b.id)!==String(id));
+  renderAll();
+  apiFetch({ action: 'delete', id });
+}
+
+async function toggleStatus(id) {
+  const b = bookings.find(x=>String(x.id)===String(id));
+  if (!b) return;
+  const cycle = {confirmed:'tentative',tentative:'cancelled',cancelled:'confirmed'};
+  b.status = cycle[b.status];
+  renderAll();
+  apiFetch({ action: 'update', id: b.id, status: b.status });
+}
+
+function renderBookings() {
+  const list = document.getElementById('bookings-list');
+  const today = new Date(); today.setHours(0,0,0,0);
+  let filtered = bookings.filter(b => {
+    const co = parseDate(b.checkout);
+    if (currentFilter==='upcoming') return co>=today && b.status!=='cancelled';
+    if (currentFilter==='confirmed') return b.status==='confirmed';
+    if (currentFilter==='tentative') return b.status==='tentative';
+    if (currentFilter==='past') return co<today;
+    return true;
+  });
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><i class="ti ti-calendar-off"></i><p>No bookings to show</p></div>';
+    return;
+  }
+  list.innerHTML = filtered.map(b => {
+    const nights = nightsBetween(b.checkin, b.checkout);
+    const pc = personClass(b.name);
+    return `<div class="booking-item ${pc}">/
+      <div class="booking-header">
+        <div>
+          <div class="booking-name">${esc(b.name)}${b.guests?` <span style="font-weight:400;font-size:13px;color:var(--text2)">· ${esc(b.guests)} guests</span>`:''}</div>
+          <div class="booking-dates"><i class="ti ti-calendar" style="font-size:13px;vertical-align:-1px;margin-right:4px;"></i>${fmtDate(b.checkin)} → ${fmtDate(b.checkout)} · ${nights} night${nights!==1?'s':''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <span class="status-badge status-${esc(b.status)}" onclick="toggleStatus('${b.id}')" title="Click to cycle status">${b.status.charAt(0).toUpperCase()+b.status.slice(1)}</span>
+          <button class="btn btn-danger btn-sm" onclick="deleteBooking('${b.id}')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+      ${b.notes?`<div class="booking-notes">${esc(b.notes)}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function updateStats() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const active = bookings.filter(b=>b.status!=='cancelled');
+  document.getElementById('stat-total').textContent = active.length;
+  document.getElementById('stat-nights').textContent = active.reduce((s,b)=>s+nightsBetween(b.checkin,b.checkout),0);
+  document.getElementById('stat-upcoming').textContent = active.filter(b=>parseDate(b.checkout)>=today).length;
+}
+
+function renderCalendar() {
+  const firstDay = new Date(calYear,calMonth,1);
+  const lastDay = new Date(calYear,calMonth+1,0);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-title').textContent = months[calMonth]+' '+calYear;
+  const grid = document.getElementById('cal-grid');
+  const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  let html = days.map(d=>`<div class="cal-header-day">${d}</div>`).join('');
+  const startPad = firstDay.getDay();
+  for (let i=0;i<startPad;i++) {
+    const d=new Date(calYear,calMonth,-startPad+i+1);
+    html+=`<div class="cal-day other-month">${d.getDate()}</div>`;
+  }
+  const active = bookings.filter(b=>b.status!=='cancelled');
+  for (let d=1;d<=lastDay.getDate();d++) {
+    const date=new Date(calYear,calMonth,d);
+    let cls="cal-day", tip="", pc="";
+    if (date.getTime()===today.getTime()) cls+=' today';
+    for (const b of active) {
+      const s=parseDate(b.checkin), e=parseDate(b.checkout);
+      const sameStart=date.getTime()===s.getTime(), sameEnd=date.getTime()===e.getTime();
+      if (sameStart && sameEnd) { cls+=" booked-single"; tip=b.name; pc=personClass(b.name); break; }
+      if (sameStart) { cls+=" booked-start"; tip=b.name+" check-in"; pc=personClass(b.name); break; }
+      if (sameEnd) { cls+=" booked-end"; tip=b.name+" check-out"; pc=personClass(b.name); break; }
+      if (date>s && date<e) { cls+=" booked-mid"; tip=b.name; pc=personClass(b.name); break; }
+    }
+    if(pc) cls+=" "+pc;
+    const safeTip = tip.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    html+=`<div class="${cls}" onmouseenter="document.getElementById('cal-tooltip').textContent='${safeTip}'" onmouseleave="document.getElementById('cal-tooltip').textContent=''">${d}</div>`;
+  }
+  const endPad=42-(startPad+lastDay.getDate());
+  for (let i=1;i<=endPad;i++) html+=`<div class="cal-day other-month">${i}</div>`;
+  grid.innerHTML=html;
+}
+
+function changeMonth(dir) {
+  calMonth+=dir;
+  if (calMonth>11){calMonth=0;calYear++;}
+  if (calMonth<0){calMonth=11;calYear--;}
+  renderCalendar();
+}
+
+clearForm();
+loadBookings();
+</script>
+</body>
+</html>
 
